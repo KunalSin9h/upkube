@@ -3,10 +3,10 @@ package views
 import (
     "strings"
     "k8s.io/client-go/kubernetes"
-    "context"
-    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
     "k8s.io/api/apps/v1"
     "strconv"
+
+    "github.com/kunalsin9h/upkube/internal/kubeapi"
 )
 
 templ Dashboard(userEmail string, clientset *kubernetes.Clientset, selectedNamespace string) {
@@ -43,11 +43,12 @@ templ Navigation(userEmail string) {
 }
 
 templ Content(clientset *kubernetes.Clientset, selectedNamespace string) {
-    {{ deployments, err := clientset.AppsV1().Deployments(selectedNamespace).List(context.TODO(), metav1.ListOptions{}) }}
+    {{ deployments, err := kubeapi.ListDeployments(clientset, selectedNamespace) }}
     if err != nil {
         @KubeError()
         return
     }
+
     <div class="min-h-screen">
         <div class="container mx-auto py-8 px-2 md:px-0 ">
             @DeploymentsHeader(clientset, len(deployments.Items), selectedNamespace)
@@ -79,7 +80,7 @@ templ KubeError() {
 }
 
 templ DeploymentsHeader(clientset *kubernetes.Clientset, total int, selectedNamespace string) {
-    {{ namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{}) }}
+    {{ namespaces, err := kubeapi.GetAllNameSpaces(clientset) }}
 
     if err != nil {
         @KubeError()
@@ -98,11 +99,11 @@ templ DeploymentsHeader(clientset *kubernetes.Clientset, total int, selectedName
                     style="box-shadow:none; border-radius:0; min-width:120px;"
                     onchange="this.form.submit()"
                 >
-                    for _, ns := range namespaces.Items {
-                        if selectedNamespace == ns.Name {
-                            <option value={ns.Name} selected>{ ns.Name }</option>
+                    for _, ns := range namespaces {
+                        if selectedNamespace == ns {
+                            <option value={ns} selected>{ ns }</option>
                         } else {
-                            <option value={ns.Name}>{ ns.Name }</option>
+                            <option value={ns}>{ ns }</option>
                         }
                     }
                 </select>
