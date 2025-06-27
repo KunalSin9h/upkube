@@ -20,10 +20,10 @@ templ Navigation(userEmail string) {
     {{ var orgEmail = tokens[1] }}
 
     <div class="container mx-auto flex justify-between items-center py-4">
-        <div class="p-2 my-2 bg-white flex items-center gap-4">
+        <div class="p-2 my-2 shadow-sm bg-white flex items-center gap-4">
             <p><span class="font-semibold">{ userName }</span><span class="text-gray-400"> { " " }{ orgEmail }</span></p>
         </div>
-        <div class="p-2 my-2 bg-white flex items-center gap-4">
+        <div class="p-2 my-2 shadow-sm bg-white flex items-center gap-4">
             <a class="font-semibold">Deployments</a>
             <a href="/logs" class="text-gray-400/80">Audit Logs</a>
         </div>
@@ -31,7 +31,8 @@ templ Navigation(userEmail string) {
 }
 
 templ Content(clientset *kubernetes.Clientset) {
-    {{ deployments, err := clientset.AppsV1().Deployments("default").List(context.TODO(), metav1.ListOptions{}) }}
+    // All deployments
+    {{ deployments, err := clientset.AppsV1().Deployments("").List(context.TODO(), metav1.ListOptions{}) }}
 
     if err != nil {
         @KubeError()
@@ -73,9 +74,8 @@ templ DeploymentsHeader(total int) {
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-xl font-bold text-gray-800 mb-2">Deployments</h1>
-                <p class="text-gray-600">Namespace: <span class="font-semibold">default</span></p>
             </div>
-            <div class="bg-white px-2 py-2 shadow-sm border">
+            <div class="bg-white px-2 py-2 shadow-sm">
                 <span class="text-sm text-gray-500">Total Deployments</span>
                 <div class="text-2xl font-bold">{ strconv.Itoa(total) }</div>
             </div>
@@ -115,110 +115,61 @@ templ DeploymentCard(dep v1.Deployment) {
                 statusText = "Degraded"
             }
         }
-    }}
-    <div class="bg-white shadow-sm border hover:shadow-md transition-shadow duration-200">
-        <div class="p-6 border-b border-gray-100">
-            <div class="flex items-start justify-between">
-                <div class="flex-1">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-1">{ dep.Name }</h3>
-                    <div class="flex items-center">
-                        <span class={ "inline-flex items-center px-2.5 py-0.5 text-xs font-medium " + statusBg + " " + statusColor }>
-                            <svg class={ "w-2 h-2 mr-1 " + statusColor } fill="currentColor" viewBox="0 0 8 8">
-                                <circle cx="4" cy="4" r="3"/>
-                            </svg>
-                            { statusText }
-                        </span>
-                    </div>
-                </div>
-                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                </svg>
-            </div>
-        </div>
-        <div class="p-6">
-            @DeploymentCardBody(dep, readyReplicas, totalReplicas, isHealthy)
-        </div>
-    </div>
-}
-
-templ DeploymentCardBody(dep v1.Deployment, readyReplicas int32, totalReplicas int32, isHealthy bool) {
-    <div class="mb-4">
-        <div class="flex items-center justify-between text-sm mb-2">
-            <span class="text-gray-600">Replicas</span>
-            <span class="font-medium">{ strconv.Itoa(int(readyReplicas)) }/{ strconv.Itoa(int(totalReplicas)) }</span>
-        </div>
-        <div class="w-full bg-gray-200 h-2">
-            {{
-                percentage := float64(0)
-                if totalReplicas > 0 {
-                    percentage = float64(readyReplicas) / float64(totalReplicas) * 100
-                }
-                progressColor := "bg-green-500"
-                if !isHealthy {
-                    if readyReplicas == 0 {
-                        progressColor = "bg-red-500"
-                    } else {
-                        progressColor = "bg-yellow-500"
-                    }
-                }
-            }}
-            <div class={ progressColor + " h-2 transition-all duration-300" } style={ "width: " + strconv.FormatFloat(percentage, 'f', 0, 64) + "%" }></div>
-        </div>
-    </div>
-    <div class="space-y-3">
-        <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Namespace</span>
-            <span class="font-medium text-indigo-600">{ dep.Namespace }</span>
-        </div>
+        image := ""
         if len(dep.Spec.Template.Spec.Containers) > 0 {
-            <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Image</span>
-                <span class="font-medium text-gray-800 truncate ml-2">
-                    {{
-                        image := dep.Spec.Template.Spec.Containers[0].Image
-                        if len(image) > 25 {
-                            image = "..." + image[len(image)-22:]
-                        }
-                    }}
-                    { image }
+            image = dep.Spec.Template.Spec.Containers[0].Image
+            if len(image) > 40 {
+                image = "..." + image[len(image)-37:]
+            }
+        }
+    }}
+    <div class="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-1">{ dep.Name }</h3>
+                <span class={ "inline-flex items-center px-2.5 py-0.5 text-xs font-medium " + statusBg + " " + statusColor }>
+                    <svg class={ "w-2 h-2 mr-1 " + statusColor } fill="currentColor" viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="3"/>
+                    </svg>
+                    { statusText }
                 </span>
             </div>
-        }
-        <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Created</span>
-            <span class="font-medium text-gray-800">
-                {{ timeAgo := dep.CreationTimestamp.Time.Format("2006-01-02 15:04") }}
-                { timeAgo }
-            </span>
-        </div>
-        <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Updated</span>
-            <span class="font-medium text-gray-800">{ strconv.Itoa(int(dep.Status.UpdatedReplicas)) }</span>
-        </div>
-        <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Available</span>
-            <span class="font-medium text-gray-800">{ strconv.Itoa(int(dep.Status.AvailableReplicas)) }</span>
-        </div>
-    </div>
-    if len(dep.Labels) > 0 {
-        <div class="mt-4 pt-4 border-t border-gray-100">
-            <div class="text-xs text-gray-600 mb-2">Labels</div>
-            <div class="flex flex-wrap gap-1">
-                {{ count := 0 }}
-                for key, value := range dep.Labels {
-                    if count < 3 {
-                        <span class="inline-flex items-center px-2 py-1 text-xs bg-gray-100 text-gray-700">
-                            { key }={ value }
-                        </span>
-                        {{ count++ }}
-                    }
-                }
-                if len(dep.Labels) > 3 {
-                    <span class="inline-flex items-center px-2 py-1 text-xs bg-gray-50 text-gray-500">
-                        +{ strconv.Itoa(len(dep.Labels) - 3) } more
-                    </span>
-                }
+            <div class="text-right">
+                <span class="text-xs text-gray-500">Namespace</span>
+                <div class="font-medium text-indigo-600">{ dep.Namespace }</div>
             </div>
         </div>
-    }
+        <div class="p-6 flex-1 flex flex-col justify-between">
+            <div class="mb-4">
+                <div class="text-xs text-gray-500 mb-1">Image</div>
+                <div class="font-mono text-sm text-gray-800 break-all">{ image }</div>
+            </div>
+            <div class="mb-4">
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600">Replicas</span>
+                    <span class="font-medium">{ strconv.Itoa(int(readyReplicas)) }/{ strconv.Itoa(int(totalReplicas)) }</span>
+                </div>
+                <div class="w-full bg-gray-200 h-2">
+                    {{
+                        percentage := float64(0)
+                        if totalReplicas > 0 {
+                            percentage = float64(readyReplicas) / float64(totalReplicas) * 100
+                        }
+                        progressColor := "bg-green-500"
+                        if !isHealthy {
+                            if readyReplicas == 0 {
+                                progressColor = "bg-red-500"
+                            } else {
+                                progressColor = "bg-yellow-500"
+                            }
+                        }
+                    }}
+                    <div class={ progressColor + " h-2 transition-all duration-300" } style={ "width: " + strconv.FormatFloat(percentage, 'f', 0, 64) + "%" }></div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-gray-500 mt-2">
+                <span>Created: { dep.CreationTimestamp.Time.Format("2006-01-02 15:04") }</span>
+            </div>
+        </div>
+    </div>
 }
