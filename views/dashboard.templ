@@ -174,32 +174,6 @@ templ DeploymentCard(dep v1.Deployment) {
             <div class="mb-4">
                 <div class="text-xs text-gray-500 mb-1">Image</div>
                 <div class="font-mono text-sm text-gray-800 break-all">{ image }</div>
-                <form method="post" action="/update-image" class="flex items-center gap-2 mt-2" style="margin:0;">
-                    <input type="hidden" name="namespace" value={dep.Namespace} />
-                    <input type="hidden" name="deployment" value={dep.Name} />
-                    {{
-                        prefix := image
-                        oldTag := ""
-                        idx := strings.LastIndex(image, ":")
-                        if idx != -1 {
-                            prefix = image[:idx]
-                            oldTag = image[idx+1:]
-                        }
-                    }}
-                    <input type="hidden" name="imagePrefix" value={prefix} />
-                    <input type="hidden" name="oldTag" value={oldTag} />
-                    <input
-                        type="text"
-                        name="tag"
-                        placeholder="New tag"
-                        class="border px-2 py-1 text-xs"
-                        style="border-radius:0; width:80px;"
-                        required
-                    />
-                    <button type="submit" class="px-2 py-1 bg-gray-100 border text-xs font-semibold hover:bg-gray-200 transition-colors" style="border-radius:0;">
-                        Update Tag Request
-                    </button>
-                </form>
             </div>
             <div class="mb-4">
                 <div class="flex items-center justify-between text-sm">
@@ -226,14 +200,48 @@ templ DeploymentCard(dep v1.Deployment) {
             </div>
             <div class="flex items-center justify-between text-xs text-gray-500 mt-2">
                 <span>Created: { dep.CreationTimestamp.Time.Format("2006-01-02 15:04") }</span>
-                <form method="post" action="/restart" style="margin:0;">
-                    <input type="hidden" name="namespace" value={dep.Namespace} />
-                    <input type="hidden" name="deployment" value={dep.Name} />
-                    <button type="submit" class="px-3 py-1 bg-gray-100 border text-xs font-semibold hover:bg-gray-200 transition-colors" style="border-radius:0;">
-                        Restart Request
-                    </button>`
-                </form>
             </div>
+            <details class="mt-4 border-t border-gray-200 pt-3">
+                <summary class="cursor-pointer select-none px-2 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-100e">
+                    Update
+                </summary>
+                <div class="mt-3 flex justify-between items-center gap-4">
+                    <form method="post" action="/update-image" class="flex items-center gap-2 cursor-pointer">
+                        <input type="hidden" name="namespace" value={dep.Namespace} />
+                        <input type="hidden" name="deployment" value={dep.Name} />
+                        {{
+                            prefix := image
+                            oldTag := ""
+                            idx := strings.LastIndex(image, ":")
+                            if idx != -1 {
+                                prefix = image[:idx]
+                                oldTag = image[idx+1:]
+                            }
+                        }}
+                        <input type="hidden" name="imagePrefix" value={prefix} />
+                        <input type="hidden" name="oldTag" value={oldTag} />
+                        <input
+                            type="text"
+                            name="tag"
+                            placeholder="New tag"
+                            class="border border-gray-400 px-2 py-1 text-xs focus:outline-none focus:bg-gray-200 transition"
+                            style="width:90px;"
+                            required
+                        />
+                        <button type="submit" class="px-3 py-1 bg-gray-100 border border-gray-400 text-xs font-semibold text-gray-800 hover:bg-gray-200 focus:bg-gray-200 transition-colors">
+                            Update Tag
+                        </button>
+                    </form>
+                    <form method="post" action="/restart" class="cursor-pointer">
+                        <input type="hidden" name="namespace" value={dep.Namespace} />
+                        <input type="hidden" name="deployment" value={dep.Name} />
+                        <button type="submit" class="px-3 py-1 bg-gray-100 border border-gray-400 text-xs font-semibold text-gray-800 hover:bg-gray-200 focus:bg-gray-200 transition-colors">
+                            Restart
+                        </button>
+                    </form>
+                </div>
+            </details>
         </div>
     </div>
 }
+
