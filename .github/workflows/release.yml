@@ -29,11 +29,11 @@ jobs:
         with:
           go-version: stable
 
-      - uses: build docker image
+      - name: build docker image
         run: |
           docker build -t ghcr.io/kunalsin9h/upkube:latest .
 
-      - uses: push docker images
+      - name: push docker images
         run: |
           echo "${{ secrets.GHCR }}" | docker login ghcr.io -u "kunalsin9h" --password-stdin
           docker push ghcr.io/kunalsin9h/upkube:latest
