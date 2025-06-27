@@ -42,14 +42,26 @@ func main() {
 		panic(err.Error())
 	}
 
-	namespace := "default"
-	deploymentName := "my-deployment"
+	// namespace := "default"
+	// deploymentName := "my-deployment"
 
 	// Restart Deployment
-	restartDeployment(clientset, namespace, deploymentName)
+	// restartDeployment(clientset, namespace, deploymentName)
 
 	// Update Deployment Image
-	updateDeploymentImage(clientset, namespace, deploymentName, "nginx:1.21")
+	// updateDeploymentImage(clientset, namespace, deploymentName, "nginx:1.21")
+
+	ctx := context.Background()
+
+	// List Deployments in a namespace (e.g., "default")
+	deployments, err := clientset.AppsV1().Deployments("default").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+
+	for _, deploy := range deployments.Items {
+		fmt.Printf("Deployment Name: %s\n", deploy.Name)
+	}
 
 	http.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		// Pass the request or extracted info to your component
