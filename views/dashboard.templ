@@ -77,10 +77,14 @@ templ DeploymentsHeader(clientset *kubernetes.Clientset, total int, selectedName
     <div class="mb-6 flex items-center justify-between">
         <div class="flex items-center gap-4">
             <h1 class="text-lg font-semibold text-gray-800">Deployments</h1>
-            <form method="get" class="bg-white shadow-sm">
-                <select name="namespace" class="px-2 py-1" onchange="this.form.submit()">
+            <form method="get" class="bg-white border-none shadow-sm">
+                <select name="namespace" class="border-none px-2 py-1" onchange="this.form.submit()">
                     for _, ns := range namespaces.Items {
-                        <option value={ns.Name} selected={selectedNamespace == ns.Name}>{ ns.Name }</option>
+                        if selectedNamespace == ns.Name {
+                            <option class="border-none" value={ns.Name} selected>{ ns.Name }</option>
+                        } else {
+                            <option class="border-none" value={ns.Name}>{ ns.Name }</option>
+                        }
                     }
                 </select>
             </form>
