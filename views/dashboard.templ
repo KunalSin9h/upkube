@@ -147,9 +147,10 @@ templ DeploymentCard(dep v1.Deployment) {
         image := ""
         if len(dep.Spec.Template.Spec.Containers) > 0 {
             image = dep.Spec.Template.Spec.Containers[0].Image
-            if len(image) > 40 {
-                image = "..." + image[len(image)-37:]
-            }
+            // IF you want to truncate the image name, then also update the code after this logic, as its being used in the form
+            // if len(image) > 40 {
+            //     image = "..." + image[len(image)-37:]
+            // }
         }
     }}
     <div class="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
@@ -172,6 +173,32 @@ templ DeploymentCard(dep v1.Deployment) {
             <div class="mb-4">
                 <div class="text-xs text-gray-500 mb-1">Image</div>
                 <div class="font-mono text-sm text-gray-800 break-all">{ image }</div>
+                <form method="post" action="/update-image" class="flex items-center gap-2 mt-2" style="margin:0;">
+                    <input type="hidden" name="namespace" value={dep.Namespace} />
+                    <input type="hidden" name="deployment" value={dep.Name} />
+                    {{
+                        prefix := image
+                        oldTag := ""
+                        idx := strings.LastIndex(image, ":")
+                        if idx != -1 {
+                            prefix = image[:idx]
+                            oldTag = image[idx+1:]
+                        }
+                    }}
+                    <input type="hidden" name="imagePrefix" value={prefix} />
+                    <input type="hidden" name="oldTag" value={oldTag} />
+                    <input
+                        type="text"
+                        name="tag"
+                        placeholder="New tag"
+                        class="border px-2 py-1 text-xs"
+                        style="border-radius:0; width:80px;"
+                        required
+                    />
+                    <button type="submit" class="px-2 py-1 bg-gray-100 border text-xs font-semibold hover:bg-gray-200 transition-colors" style="border-radius:0;">
+                        Update Tag Request
+                    </button>
+                </form>
             </div>
             <div class="mb-4">
                 <div class="flex items-center justify-between text-sm">
@@ -202,7 +229,7 @@ templ DeploymentCard(dep v1.Deployment) {
                     <input type="hidden" name="namespace" value={dep.Namespace} />
                     <input type="hidden" name="deployment" value={dep.Name} />
                     <button type="submit" class="px-3 py-1 bg-gray-100 border text-xs font-semibold hover:bg-gray-200 transition-colors" style="border-radius:0;">
-                        Restart
+                        Restart Request
                     </button>`
                 </form>
             </div>

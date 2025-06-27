@@ -119,8 +119,39 @@ func main() {
 		}
 		fmt.Println(namespace, deployment)
 		// TODO: Send some notification to the user.
-		go kubeapi.RestartDeployment(clientset, namespace, deployment)
+		err := kubeapi.RestartDeployment(clientset, namespace, deployment)
+		if err != nil {
+			http.Error(w, "Failed to restart deployment: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+	})
+
+	http.HandleFunc("POST /update-image", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		namespace := r.FormValue("namespace")
+		deployment := r.FormValue("deployment")
+		imagePrefix := r.FormValue("imagePrefix")
+		oldTag := r.FormValue("oldTag")
+		tag := r.FormValue("tag")
+
+		if namespace == "" || deployment == "" || oldTag == "" || imagePrefix == "" || tag == "" {
+			http.Error(w, "Missing parameters", http.StatusBadRequest)
+			return
+		}
+
+		newImage := imagePrefix + ":" + tag
+
+		err := kubeapi.UpdateDeploymentImage(clientset, namespace, deployment, newImage)
+		if err != nil {
+			http.Error(w, "Failed to update image: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
 	})
 
 	fmt.Println("Listening on http://" + HOST + ":" + PORT)

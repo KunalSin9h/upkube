@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func RestartDeployment(clientset *kubernetes.Clientset, namespace, deploymentName string) {
+func RestartDeployment(clientset *kubernetes.Clientset, namespace, deploymentName string) error {
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		deployment, getErr := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 		if getErr != nil {
@@ -24,12 +24,13 @@ func RestartDeployment(clientset *kubernetes.Clientset, namespace, deploymentNam
 		return updateErr
 	})
 	if retryErr != nil {
-		panic(fmt.Errorf("Update failed: %v", retryErr))
+		return fmt.Errorf("Update failed: %v", retryErr)
 	}
-	fmt.Println("Deployment restarted successfully.")
+
+	return nil
 }
 
-func UpdateDeploymentImage(clientset *kubernetes.Clientset, namespace, deploymentName, newImage string) {
+func UpdateDeploymentImage(clientset *kubernetes.Clientset, namespace, deploymentName, newImage string) error {
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		deployment, getErr := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 		if getErr != nil {
@@ -41,7 +42,8 @@ func UpdateDeploymentImage(clientset *kubernetes.Clientset, namespace, deploymen
 		return updateErr
 	})
 	if retryErr != nil {
-		panic(fmt.Errorf("Update failed: %v", retryErr))
+		return fmt.Errorf("Update failed: %v", retryErr)
 	}
-	fmt.Println("Deployment image updated successfully.")
+
+	return nil
 }
