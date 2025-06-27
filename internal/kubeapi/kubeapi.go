@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"log/slog"
+
 	v1 "k8s.io/api/apps/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -24,6 +26,7 @@ func NewClientSet(env string) (*kubernetes.Clientset, error) {
 		// Create in-cluster config
 		config, err = rest.InClusterConfig()
 		if err != nil {
+			slog.Any("Error creating in-cluster config", err)
 			return nil, fmt.Errorf("failed to create in-cluster config: %v", err)
 		}
 	} else {
@@ -31,6 +34,7 @@ func NewClientSet(env string) (*kubernetes.Clientset, error) {
 		kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
 		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 		if err != nil {
+			slog.Error("Failed to create config from kubeconfig file", "kubeconfig", kubeconfig, "error", err)
 			return nil, fmt.Errorf("failed to create config from kubeconfig file: %v", err)
 		}
 	}
@@ -38,6 +42,7 @@ func NewClientSet(env string) (*kubernetes.Clientset, error) {
 	// Create clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
+		slog.Error("Failed to create clientset: %v", err)
 		return nil, fmt.Errorf("failed to create clientset: %v", err)
 	}
 
@@ -61,6 +66,7 @@ func GetAllNameSpaces(clientset *kubernetes.Clientset) ([]string, error) {
 func ListDeployments(clientset *kubernetes.Clientset, namespace string) (*v1.DeploymentList, error) {
 	deployments, err := clientset.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
+		slog.Error("Failed to list deployments in namespace %s: %v", namespace, err)
 		return nil, fmt.Errorf("failed to list deployments in namespace %s: %v", namespace, err)
 	}
 
@@ -81,6 +87,7 @@ func RestartDeployment(clientset *kubernetes.Clientset, namespace, deploymentNam
 		return updateErr
 	})
 	if retryErr != nil {
+		slog.Error("Failed to restart deployment %s in namespace %s: %v", deploymentName, namespace, retryErr)
 		return fmt.Errorf("Update failed: %v", retryErr)
 	}
 
@@ -99,6 +106,7 @@ func UpdateDeploymentImage(clientset *kubernetes.Clientset, namespace, deploymen
 		return updateErr
 	})
 	if retryErr != nil {
+		slog.Error("Failed to update image for deployment %s in namespace %s: %v", deploymentName, namespace, retryErr)
 		return fmt.Errorf("Update failed: %v", retryErr)
 	}
 
