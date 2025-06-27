@@ -3,7 +3,7 @@
   <h3>Bare minimum kubernetes deployment management platform, using Pod Service Account, build for usage behind Cloudflare Zero Trust</h3>
 </div>
 
-## Production Deployment
+### Production Deployment
 
 `upkube` is a `~60 MiB` container build using `golang` with `templ` html templating, no js. When deployed using `UPKUBE_ENV=PROD` variables (recommended for production usage), it connect to kubernetes cluster using **Pod Service Account**. It is does not have auth, its build for usage behind **Cloudflare Zero Trust**. 
 
@@ -26,7 +26,7 @@
 
 Fore full kubernetes deployment exampel: [k8s](https://github.com/KunalSin9h/upkube/tree/master/k8s) directory. 
 
-### Environment Variables
+#### Environment Variables
 
 - `UPKUBE_HOST` - Set host for http service, default is `127.0.0.1`
 - `UPKUBE_PORT` - Set port for http serivde, default is `8080`
@@ -38,9 +38,9 @@ Fore full kubernetes deployment exampel: [k8s](https://github.com/KunalSin9h/upk
 
 ---
 
-## Local Development
+### Local Development
 
-## Stack
+### Stack
 
 - GO
 - [TEMPL](https://templ.guide/)
