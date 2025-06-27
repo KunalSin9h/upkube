@@ -54,6 +54,13 @@ spec:
         image: ghcr.io/kunalsin9h/upkube:latest
         ports:
         - containerPort: 8080
+        env:
+        - name: UPKUBE_ENV
+          value: "PROD"
+        - name: UPKUBE_HOST
+          value: "0.0.0.0"
+        - name: UPKUBE_PORT
+          value: "8080"
 
 ---
 
