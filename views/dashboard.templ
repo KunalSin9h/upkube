@@ -44,6 +44,7 @@ templ Navigation(userEmail string) {
 
 templ Content(clientset *kubernetes.Clientset, selectedNamespace string) {
     {{ deployments, err := kubeapi.ListDeployments(clientset, selectedNamespace) }}
+
     if err != nil {
         @KubeError()
         return

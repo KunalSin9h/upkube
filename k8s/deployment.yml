@@ -51,7 +51,7 @@ spec:
       serviceAccountName: upkube-sa
       containers:
       - name: upkube
-        image: ghcr.io/kunalsin9h/upkube:latest
+        image: ghcr.io/kunalsin9h/upkube:rc2
         ports:
         - containerPort: 8080
         env:

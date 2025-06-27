@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"log/slog"
-
 	v1 "k8s.io/api/apps/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -26,7 +24,7 @@ func NewClientSet(env string) (*kubernetes.Clientset, error) {
 		// Create in-cluster config
 		config, err = rest.InClusterConfig()
 		if err != nil {
-			slog.Any("Error creating in-cluster config", err)
+			fmt.Println("Failed to create in-cluster config:", err)
 			return nil, fmt.Errorf("failed to create in-cluster config: %v", err)
 		}
 	} else {
@@ -34,7 +32,7 @@ func NewClientSet(env string) (*kubernetes.Clientset, error) {
 		kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
 		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 		if err != nil {
-			slog.Error("Failed to create config from kubeconfig file", "kubeconfig", kubeconfig, "error", err)
+			fmt.Println("Failed to create config from kubeconfig file:", err)
 			return nil, fmt.Errorf("failed to create config from kubeconfig file: %v", err)
 		}
 	}
@@ -42,7 +40,7 @@ func NewClientSet(env string) (*kubernetes.Clientset, error) {
 	// Create clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		slog.Error("Failed to create clientset", "err", err.Error())
+		fmt.Println("Failed to create clientset:", err)
 		return nil, fmt.Errorf("failed to create clientset: %v", err)
 	}
 
@@ -52,7 +50,10 @@ func NewClientSet(env string) (*kubernetes.Clientset, error) {
 func GetAllNameSpaces(clientset *kubernetes.Clientset) ([]string, error) {
 	namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to list namespaces: %v", err)
+		fmt.Printf("Failed to list namespaces: %v\n", err)
+		//return nil, fmt.Errorf("failed to list namespaces: %v", err)
+		// Hypothesis: is service account is in default namespaces, we might not access other namespaces
+		return []string{"default"}, nil // Return default namespace if listing fails
 	}
 
 	var namespaceNames []string
@@ -66,7 +67,7 @@ func GetAllNameSpaces(clientset *kubernetes.Clientset) ([]string, error) {
 func ListDeployments(clientset *kubernetes.Clientset, namespace string) (*v1.DeploymentList, error) {
 	deployments, err := clientset.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		slog.Error("Failed to list deployments in namespace %s: %v", namespace, err)
+		fmt.Println("Failed to list deployments in namespace", namespace, ":", err)
 		return nil, fmt.Errorf("failed to list deployments in namespace %s: %v", namespace, err)
 	}
 
@@ -87,7 +88,7 @@ func RestartDeployment(clientset *kubernetes.Clientset, namespace, deploymentNam
 		return updateErr
 	})
 	if retryErr != nil {
-		slog.Error("Failed to restart deployment in namespace", "deployment name", deploymentName, "namespace", namespace, "retry", retryErr.Error())
+		fmt.Println("Failed to restart deployment in namespace", namespace, ":", retryErr)
 		return fmt.Errorf("Update failed: %v", retryErr)
 	}
 
@@ -106,7 +107,7 @@ func UpdateDeploymentImage(clientset *kubernetes.Clientset, namespace, deploymen
 		return updateErr
 	})
 	if retryErr != nil {
-		slog.Error("Failed to restart deployment in namespace", "deployment name", deploymentName, "namespace", namespace, "retry", retryErr.Error())
+		fmt.Println("Failed to update deployment image in namespace", namespace, ":", retryErr)
 		return fmt.Errorf("Update failed: %v", retryErr)
 	}
 
