@@ -42,7 +42,7 @@ func NewClientSet(env string) (*kubernetes.Clientset, error) {
 	// Create clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		slog.Error("Failed to create clientset: %v", err)
+		slog.Error("Failed to create clientset", "err", err.Error())
 		return nil, fmt.Errorf("failed to create clientset: %v", err)
 	}
 
@@ -87,7 +87,7 @@ func RestartDeployment(clientset *kubernetes.Clientset, namespace, deploymentNam
 		return updateErr
 	})
 	if retryErr != nil {
-		slog.Error("Failed to restart deployment %s in namespace %s: %v", deploymentName, namespace, retryErr)
+		slog.Error("Failed to restart deployment in namespace", "deployment name", deploymentName, "namespace", namespace, "retry", retryErr.Error())
 		return fmt.Errorf("Update failed: %v", retryErr)
 	}
 
@@ -106,7 +106,7 @@ func UpdateDeploymentImage(clientset *kubernetes.Clientset, namespace, deploymen
 		return updateErr
 	})
 	if retryErr != nil {
-		slog.Error("Failed to update image for deployment %s in namespace %s: %v", deploymentName, namespace, retryErr)
+		slog.Error("Failed to restart deployment in namespace", "deployment name", deploymentName, "namespace", namespace, "retry", retryErr.Error())
 		return fmt.Errorf("Update failed: %v", retryErr)
 	}
 
