@@ -8,11 +8,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/kunalsin9h/upkube/internal/kubeapi"
 	"github.com/kunalsin9h/upkube/views"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
-	"k8s.io/client-go/util/retry"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -87,6 +87,7 @@ func main() {
 		userEmail := r.Header.Get("Cf-Access-Authenticated-User-Email")
 		// If your Root templ expects userEmail:
 
+		// TODO: unauthorized page.
 		// if userEmail == "" || true {
 		// 	// Not authenticated or header missing
 		// 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -109,42 +110,19 @@ func main() {
 		w.Write([]byte("OK"))
 	})
 
+	http.HandleFunc("POST /restart", func(w http.ResponseWriter, r *http.Request) {
+		namespace := r.FormValue("namespace")
+		deployment := r.FormValue("deployment")
+		if namespace == "" || deployment == "" {
+			http.Error(w, "Missing parameters", http.StatusBadRequest)
+			return
+		}
+		fmt.Println(namespace, deployment)
+		// TODO: Send some notification to the user.
+		go kubeapi.RestartDeployment(clientset, namespace, deployment)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	})
+
 	fmt.Println("Listening on http://" + HOST + ":" + PORT)
 	http.ListenAndServe(HOST+":"+PORT, nil)
-}
-
-func restartDeployment(clientset *kubernetes.Clientset, namespace, deploymentName string) {
-	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		deployment, getErr := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
-		if getErr != nil {
-			return getErr
-		}
-		if deployment.Spec.Template.Annotations == nil {
-			deployment.Spec.Template.Annotations = map[string]string{}
-		}
-		deployment.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = fmt.Sprintf("%v", metav1.Now())
-		_, updateErr := clientset.AppsV1().Deployments(namespace).Update(context.TODO(), deployment, metav1.UpdateOptions{})
-		return updateErr
-	})
-	if retryErr != nil {
-		panic(fmt.Errorf("Update failed: %v", retryErr))
-	}
-	fmt.Println("Deployment restarted successfully.")
-}
-
-func updateDeploymentImage(clientset *kubernetes.Clientset, namespace, deploymentName, newImage string) {
-	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		deployment, getErr := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
-		if getErr != nil {
-			return getErr
-		}
-		// Assuming the first container is the one to update
-		deployment.Spec.Template.Spec.Containers[0].Image = newImage
-		_, updateErr := clientset.AppsV1().Deployments(namespace).Update(context.TODO(), deployment, metav1.UpdateOptions{})
-		return updateErr
-	})
-	if retryErr != nil {
-		panic(fmt.Errorf("Update failed: %v", retryErr))
-	}
-	fmt.Println("Deployment image updated successfully.")
 }

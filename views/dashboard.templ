@@ -198,6 +198,13 @@ templ DeploymentCard(dep v1.Deployment) {
             </div>
             <div class="flex items-center justify-between text-xs text-gray-500 mt-2">
                 <span>Created: { dep.CreationTimestamp.Time.Format("2006-01-02 15:04") }</span>
+                <form method="post" action="/restart" style="margin:0;">
+                    <input type="hidden" name="namespace" value={dep.Namespace} />
+                    <input type="hidden" name="deployment" value={dep.Name} />
+                    <button type="submit" class="px-3 py-1 bg-gray-100 border text-xs font-semibold hover:bg-gray-200 transition-colors" style="border-radius:0;">
+                        Restart
+                    </button>`
+                </form>
             </div>
         </div>
     </div>
