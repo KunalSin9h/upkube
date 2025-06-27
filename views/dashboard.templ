@@ -123,6 +123,103 @@ templ NoDeployments() {
     </div>
 }
 
+templ DeploymentCardHeader(dep v1.Deployment, statusText string, statusColor string, statusBg string) {
+    <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-1">{ dep.Name }</h3>
+            <span class={ "inline-flex items-center px-2.5 py-0.5 text-xs font-medium " + statusBg + " " + statusColor }>
+                <svg class={ "w-2 h-2 mr-1 " + statusColor } fill="currentColor" viewBox="0 0 8 8">
+                    <circle cx="4" cy="4" r="3"/>
+                </svg>
+                { statusText }
+            </span>
+        </div>
+        <div class="text-right">
+            <span class="text-xs text-gray-500">Namespace</span>
+            <div class="font-medium text-indigo-600">{ dep.Namespace }</div>
+        </div>
+    </div>
+}
+
+templ DeploymentCardImage(image string) {
+    <div class="mb-4">
+        <div class="text-xs text-gray-500 mb-1">Image</div>
+        <div class="font-mono text-sm text-gray-800 break-all">{ image }</div>
+    </div>
+}
+
+templ DeploymentCardReplicas(readyReplicas int32, totalReplicas int32, isHealthy bool) {
+    <div class="mb-4">
+        <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Replicas</span>
+            <span class="font-medium">{ strconv.Itoa(int(readyReplicas)) }/{ strconv.Itoa(int(totalReplicas)) }</span>
+        </div>
+        <div class="w-full bg-gray-200 h-2">
+            {{
+                percentage := float64(0)
+                if totalReplicas > 0 {
+                    percentage = float64(readyReplicas) / float64(totalReplicas) * 100
+                }
+                progressColor := "bg-green-500"
+                if !isHealthy {
+                    if readyReplicas == 0 {
+                        progressColor = "bg-red-500"
+                    } else {
+                        progressColor = "bg-yellow-500"
+                    }
+                }
+            }}
+            <div class={ progressColor + " h-2 transition-all duration-300" } style={ "width: " + strconv.FormatFloat(percentage, 'f', 0, 64) + "%" }></div>
+        </div>
+    </div>
+}
+
+templ DeploymentCardActions(dep v1.Deployment, image string) {
+    <div class="flex items-center justify-between text-xs text-gray-500 mt-2">
+        <span>Created: { dep.CreationTimestamp.Time.Format("2006-01-02 15:04") }</span>
+    </div>
+    <details class="mt-4 border-t border-gray-200 pt-3">
+        <summary class="cursor-pointer select-none px-2 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-100e">
+            Update
+        </summary>
+        <div class="mt-3 flex justify-between items-center gap-4">
+            <form method="post" action="/update-image" class="flex items-center gap-2 cursor-pointer">
+                <input type="hidden" name="namespace" value={dep.Namespace} />
+                <input type="hidden" name="deployment" value={dep.Name} />
+                {{
+                    prefix := image
+                    oldTag := ""
+                    idx := strings.LastIndex(image, ":")
+                    if idx != -1 {
+                        prefix = image[:idx]
+                        oldTag = image[idx+1:]
+                    }
+                }}
+                <input type="hidden" name="imagePrefix" value={prefix} />
+                <input type="hidden" name="oldTag" value={oldTag} />
+                <input
+                    type="text"
+                    name="tag"
+                    placeholder="New tag"
+                    class="border border-gray-400 px-2 py-1 text-xs focus:outline-none focus:bg-gray-200 transition"
+                    style="width:90px;"
+                    required
+                />
+                <button type="submit" class="px-3 py-1 bg-gray-100 border border-gray-400 text-xs font-semibold text-gray-800 hover:bg-gray-200 focus:bg-gray-200 transition-colors">
+                    Update Tag
+                </button>
+            </form>
+            <form method="post" action="/restart" class="cursor-pointer">
+                <input type="hidden" name="namespace" value={dep.Namespace} />
+                <input type="hidden" name="deployment" value={dep.Name} />
+                <button type="submit" class="px-3 py-1 bg-gray-100 border border-gray-400 text-xs font-semibold text-gray-800 hover:bg-gray-200 focus:bg-gray-200 transition-colors">
+                    Restart
+                </button>
+            </form>
+        </div>
+    </details>
+}
+
 templ DeploymentCard(dep v1.Deployment) {
     {{
         readyReplicas := dep.Status.ReadyReplicas
@@ -148,99 +245,14 @@ templ DeploymentCard(dep v1.Deployment) {
         image := ""
         if len(dep.Spec.Template.Spec.Containers) > 0 {
             image = dep.Spec.Template.Spec.Containers[0].Image
-            // IF you want to truncate the image name, then also update the code after this logic, as its being used in the form
-            // if len(image) > 40 {
-            //     image = "..." + image[len(image)-37:]
-            // }
         }
     }}
     <div class="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
-        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-            <div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-1">{ dep.Name }</h3>
-                <span class={ "inline-flex items-center px-2.5 py-0.5 text-xs font-medium " + statusBg + " " + statusColor }>
-                    <svg class={ "w-2 h-2 mr-1 " + statusColor } fill="currentColor" viewBox="0 0 8 8">
-                        <circle cx="4" cy="4" r="3"/>
-                    </svg>
-                    { statusText }
-                </span>
-            </div>
-            <div class="text-right">
-                <span class="text-xs text-gray-500">Namespace</span>
-                <div class="font-medium text-indigo-600">{ dep.Namespace }</div>
-            </div>
-        </div>
+        @DeploymentCardHeader(dep, statusText, statusColor, statusBg)
         <div class="p-6 flex-1 flex flex-col justify-between">
-            <div class="mb-4">
-                <div class="text-xs text-gray-500 mb-1">Image</div>
-                <div class="font-mono text-sm text-gray-800 break-all">{ image }</div>
-            </div>
-            <div class="mb-4">
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-600">Replicas</span>
-                    <span class="font-medium">{ strconv.Itoa(int(readyReplicas)) }/{ strconv.Itoa(int(totalReplicas)) }</span>
-                </div>
-                <div class="w-full bg-gray-200 h-2">
-                    {{
-                        percentage := float64(0)
-                        if totalReplicas > 0 {
-                            percentage = float64(readyReplicas) / float64(totalReplicas) * 100
-                        }
-                        progressColor := "bg-green-500"
-                        if !isHealthy {
-                            if readyReplicas == 0 {
-                                progressColor = "bg-red-500"
-                            } else {
-                                progressColor = "bg-yellow-500"
-                            }
-                        }
-                    }}
-                    <div class={ progressColor + " h-2 transition-all duration-300" } style={ "width: " + strconv.FormatFloat(percentage, 'f', 0, 64) + "%" }></div>
-                </div>
-            </div>
-            <div class="flex items-center justify-between text-xs text-gray-500 mt-2">
-                <span>Created: { dep.CreationTimestamp.Time.Format("2006-01-02 15:04") }</span>
-            </div>
-            <details class="mt-4 border-t border-gray-200 pt-3">
-                <summary class="cursor-pointer select-none px-2 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-100e">
-                    Update
-                </summary>
-                <div class="mt-3 flex justify-between items-center gap-4">
-                    <form method="post" action="/update-image" class="flex items-center gap-2 cursor-pointer">
-                        <input type="hidden" name="namespace" value={dep.Namespace} />
-                        <input type="hidden" name="deployment" value={dep.Name} />
-                        {{
-                            prefix := image
-                            oldTag := ""
-                            idx := strings.LastIndex(image, ":")
-                            if idx != -1 {
-                                prefix = image[:idx]
-                                oldTag = image[idx+1:]
-                            }
-                        }}
-                        <input type="hidden" name="imagePrefix" value={prefix} />
-                        <input type="hidden" name="oldTag" value={oldTag} />
-                        <input
-                            type="text"
-                            name="tag"
-                            placeholder="New tag"
-                            class="border border-gray-400 px-2 py-1 text-xs focus:outline-none focus:bg-gray-200 transition"
-                            style="width:90px;"
-                            required
-                        />
-                        <button type="submit" class="px-3 py-1 bg-gray-100 border border-gray-400 text-xs font-semibold text-gray-800 hover:bg-gray-200 focus:bg-gray-200 transition-colors">
-                            Update Tag
-                        </button>
-                    </form>
-                    <form method="post" action="/restart" class="cursor-pointer">
-                        <input type="hidden" name="namespace" value={dep.Namespace} />
-                        <input type="hidden" name="deployment" value={dep.Name} />
-                        <button type="submit" class="px-3 py-1 bg-gray-100 border border-gray-400 text-xs font-semibold text-gray-800 hover:bg-gray-200 focus:bg-gray-200 transition-colors">
-                            Restart
-                        </button>
-                    </form>
-                </div>
-            </details>
+            @DeploymentCardImage(image)
+            @DeploymentCardReplicas(readyReplicas, totalReplicas, isHealthy)
+            @DeploymentCardActions(dep, image)
         </div>
     </div>
 }
