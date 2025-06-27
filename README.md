@@ -65,8 +65,4 @@ Start live reloaded Application
 go tool air
 ```
 
-After update the template, generate go code using: 
-
-```bash
-go tool templ generate
-```
+This will start the application on specieif port (using env), or deafult is `http://localhost:8080`
