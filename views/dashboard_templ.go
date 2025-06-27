@@ -74,7 +74,7 @@ func Navigation(userEmail string) templ.Component {
 		var tokens = strings.Split(userEmail, "@")
 		var userName = tokens[0]
 		var orgEmail = tokens[1]
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto flex justify-between items-center py-4\"><div class=\"p-2 my-2 shadow-sm bg-white flex items-center gap-4\"><a href=\"/\" class=\"font-semibold\">Deployments</a> <a href=\"/logs\" class=\"text-gray-400/80\">Audit Logs</a></div><div class=\"flex items-center gap-4\"><div class=\"p-2 my-2 shadow-sm bg-white flex items-center gap-4\"><p><span class=\"font-semibold\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto flex justify-between gap-4 items-center px-2 md:px-0 py-4\"><div class=\"p-2 my-2 shadow-sm bg-white flex items-center gap-4\"><a href=\"/\" class=\"font-semibold\">Deployments</a> <a href=\"/logs\" class=\"text-gray-400/80\">Logs</a></div><div class=\"flex items-center gap-4\"><div class=\"p-2 my-2 shadow-sm bg-white flex items-center gap-4\"><p><span class=\"font-semibold\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -109,7 +109,7 @@ func Navigation(userEmail string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></p></div><div><a href=\"https://github.com/kunalsin9h/upkube\" target=\"_blank\" rel=\"noopener noreferrer\" title=\"View on GitHub\" class=\"flex items-center gap-2 text-gray-600 hover:text-black\"><svg class=\"w-5 h-5\" fill=\"currentColor\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M12 2C6.477 2 2 6.484 2 12.021c0 4.426 2.865 8.18 6.839 9.504.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.089 2.91.833.092-.647.35-1.089.636-1.34-2.221-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.748-1.025 2.748-1.025.546 1.378.202 2.397.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.337 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.749 0 .268.18.579.688.481C19.138 20.197 22 16.444 22 12.021 22 6.484 17.523 2 12 2z\"></path></svg> <span class=\"hidden sm:inline\">GitHub</span></a></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></p></div><div><a href=\"https://github.com/kunalsin9h/upkube\" target=\"_blank\" rel=\"noopener noreferrer\" title=\"View on GitHub\" class=\"hidden sm:flex items-center gap-2 text-gray-600 hover:text-black\"><svg class=\"w-5 h-5\" fill=\"currentColor\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M12 2C6.477 2 2 6.484 2 12.021c0 4.426 2.865 8.18 6.839 9.504.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.089 2.91.833.092-.647.35-1.089.636-1.34-2.221-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.748-1.025 2.748-1.025.546 1.378.202 2.397.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.337 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.749 0 .268.18.579.688.481C19.138 20.197 22 16.444 22 12.021 22 6.484 17.523 2 12 2z\"></path></svg> <span class=\"hidden sm:inline\">GitHub</span></a></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -149,7 +149,7 @@ func Content(clientset *kubernetes.Clientset, selectedNamespace string) templ.Co
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"min-h-screen\"><div class=\"container mx-auto py-8\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"min-h-screen\"><div class=\"container mx-auto py-8 px-2 md:px-0 \">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -247,7 +247,7 @@ func DeploymentsHeader(clientset *kubernetes.Clientset, total int, selectedNames
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"mb-6 flex items-center justify-between\"><div class=\"flex items-center gap-4\"><h1 class=\"text-lg font-semibold text-gray-800\">Deployments</h1><form method=\"get\" class=\"flex items-center\"><label for=\"namespace\" class=\"text-sm text-gray-600 mr-2\">Namespace:</label> <select id=\"namespace\" name=\"namespace\" class=\"border border-gray-300 bg-white text-gray-800 text-sm px-2 py-1 focus:outline-none focus:border-indigo-500\" style=\"box-shadow:none; border-radius:0; min-width:120px;\" onchange=\"this.form.submit()\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4\"><div class=\"flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4\"><h1 class=\"text-lg font-semibold text-gray-800\">Deployments</h1><form method=\"get\" class=\"flex items-center\"><label for=\"namespace\" class=\"text-sm text-gray-600 mr-2\">Namespace:</label> <select id=\"namespace\" name=\"namespace\" class=\"border border-gray-300 bg-white text-gray-800 text-sm px-2 py-1 focus:outline-none focus:border-indigo-500\" style=\"box-shadow:none; border-radius:0; min-width:120px;\" onchange=\"this.form.submit()\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -316,14 +316,14 @@ func DeploymentsHeader(clientset *kubernetes.Clientset, total int, selectedNames
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</select></form></div><span class=\"text-gray-800 text-sm p-2 bg-white shadow-sm\">Total: <span class=\"font-bold\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</select></form></div><span class=\"text-gray-800 text-sm p-2 bg-white shadow-sm w-full sm:w-auto text-center\">Total: <span class=\"font-bold\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(total))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard.templ`, Line: 111, Col: 119}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard.templ`, Line: 111, Col: 148}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
