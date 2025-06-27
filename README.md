@@ -1,11 +1,11 @@
 <div align="center">
   <img src="https://github.com/user-attachments/assets/a07c897e-c66f-47de-ac04-1649e4a3ea48" alt="Upcube logo" width="700px" />  
-  <h3>Bare minimum kubernetes deployment management platform, using Pod Service Account, build for usage behind Cloudflare Zeroauth</h3>
+  <h3>Bare minimum kubernetes deployment management platform, using Pod Service Account, build for usage behind Cloudflare Zero Trust</h3>
 </div>
 
 ## Production Deployment
 
-`Upkube` is a `~60 MiB` container build using `golang` with `templ` html templating, no js. When deployed using `UPKUBE_ENV=PROD` variables (recommended for production usage), it connect to kubernetes cluster using **Pod Service Account**. It is does not have auth, its build for usage behind **Cloudflare Zerotrust**. 
+`upkube` is a `~60 MiB` container build using `golang` with `templ` html templating, no js. When deployed using `UPKUBE_ENV=PROD` variables (recommended for production usage), it connect to kubernetes cluster using **Pod Service Account**. It is does not have auth, its build for usage behind **Cloudflare Zero Trust**. 
 
 ```yaml
 apiVersion: apps/v1
