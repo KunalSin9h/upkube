@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	UPKUBE_HOST = "localhost"
+	UPKUBE_HOST = "127.0.0.1"
 	UPKUBE_PORT = "8080"
 	UPKUBE_ENV  = "DEV" // or "PROD" based on your environment
 )
