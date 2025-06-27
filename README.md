@@ -36,16 +36,22 @@ Fore full kubernetes deployment exampel: [k8s](https://github.com/KunalSin9h/upk
 
   - When using `DEV`, it connects from a master url or a kubeconfig filepath. default is `~/.kube/config`
 
----
+
+#### Roadmap
+
+- [ ] Support Activity Logs
+- [ ] Request and Approve workflow
 
 ### Local Development
 
 ### Stack
 
-- GO
-- [TEMPL](https://templ.guide/)
-- TAILWINDCSS
-- MINIKUBE
+- go
+- [templ](https://templ.guide/)
+- tailwindcss
+- minikube
+
+After cloning the repo...
 
 Download dependencies and tools. 
 
