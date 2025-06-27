@@ -1,8 +1,7 @@
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/c830ac39-1369-459c-b45d-0a205b90dd27" alt="Upcube logo" />  
-  <h2>Bare minimum kubernetes deployment management platform. </h2>
+  <img src="https://github.com/user-attachments/assets/a07c897e-c66f-47de-ac04-1649e4a3ea48" alt="Upcube logo" width="700px" />  
+  <h2>Bare minimum kubernetes deployment management platform.</h2>
 </div>
-
 
 
 ## Deployment
