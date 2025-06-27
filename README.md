@@ -8,21 +8,7 @@
 `upkube` is a `~60 MiB` container build using `golang` with `templ` html templating, no js. When deployed using `UPKUBE_ENV=PROD` variables (recommended for production usage), it connect to kubernetes cluster using **Pod Service Account**. It is does not have auth, its build for usage behind **Cloudflare Zero Trust**. 
 
 ```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: upkube
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: upkube
-  template:
-    metadata:
-      labels:
-        app: upkube
-    spec:
+...
       serviceAccountName: upkube-sa
       containers:
       - name: upkube
@@ -50,7 +36,7 @@ Fore full kubernetes deployment exampel: [k8s](https://github.com/KunalSin9h/upk
 
   - When using `DEV`, it connects from a master url or a kubeconfig filepath. default is `~/.kube/config`
 
-
+---
 
 ## Local Development
 
@@ -67,7 +53,7 @@ Download dependencies and tools.
 go mod download
 ```
 
-Download and make sure `minikube` is running. 
+Download and make sure `minikube` is running, for local k8s testing. 
 
 ```bash
 minikube start
