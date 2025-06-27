@@ -1,0 +1,32 @@
+package views
+
+import (
+    "strings"
+)
+
+templ Dashboard(userEmail string) {
+    @Navigation(userEmail)
+    @Content()
+}
+
+templ Navigation(userEmail string) {
+    {{ var tokens = strings.Split(userEmail, "@") }}
+    {{ var userName = tokens[0] }}
+    {{ var orgEmail = tokens[1] }}
+
+   <div class="container mx-auto flex justify-between items-center py-4">
+        <div class="p-2 my-2 bg-white shadow-sm flex items-center gap-4">
+            <p><span class="font-semibold">{ userName }</span><span class="text-gray-400"> { " " }{ orgEmail }</span></p>
+        </div>
+        <div class="p-2 my-2 bg-white shadow-sm flex items-center gap-4">
+            <a class="font-semibold">Deployments</a>
+            <a href="/logs" class="text-gray-400/80" >Audit Logs</a>
+        </div>
+    </div>
+}
+
+templ Content() {
+    <div class="container mx-auto p-2 bg-white flex flex-col justify-start items-stretch">
+        <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+    </div>
+}
