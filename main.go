@@ -3,12 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/kunalsin9h/upkube/views"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
 	"k8s.io/client-go/util/retry"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,15 +34,22 @@ func init() {
 
 func main() {
 	// Create in-cluster config
-	config, err := rest.InClusterConfig()
+	// config, err := rest.InClusterConfig()
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// }
+
+	// Use local kubeconfig
+	kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	// Create clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	// namespace := "default"
@@ -76,7 +86,7 @@ func main() {
 
 		userEmail = "kunal.singh@safedep.io"
 
-		root := views.Root(userEmail)
+		root := views.Root(userEmail, clientset)
 		root.Render(r.Context(), w)
 	})
 

@@ -2,11 +2,12 @@ package views
 
 import (
     "strings"
+    "k8s.io/client-go/kubernetes"
 )
 
-templ Dashboard(userEmail string) {
+templ Dashboard(userEmail string, clientset *kubernetes.Clientset) {
     @Navigation(userEmail)
-    @Content()
+    @Content(clientset)
 }
 
 templ Navigation(userEmail string) {
@@ -25,7 +26,9 @@ templ Navigation(userEmail string) {
     </div>
 }
 
-templ Content() {
+templ Content(clientset *kubernetes.Clientset) {
+    
+
     <div class="container mx-auto p-2 bg-white flex flex-col justify-start items-stretch">
         <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
     </div>

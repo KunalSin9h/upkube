@@ -1,6 +1,10 @@
 package views
 
-templ Root(userEmail string) {
+import (
+    "k8s.io/client-go/kubernetes"
+)
+
+templ Root(userEmail string, clientset *kubernetes.Clientset) {
     <html lang="en">
         <head>
             <meta charset="UTF-8" />
@@ -32,7 +36,7 @@ templ Root(userEmail string) {
             </style>
         </head>
         <body class="bg-gray-100 text-gray-900 poppins-regular">
-            @Dashboard(userEmail)
+            @Dashboard(userEmail, clientset)
         </body>
     </html>
 }
