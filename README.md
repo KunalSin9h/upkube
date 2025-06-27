@@ -40,6 +40,20 @@ spec:
 
 Fore full kubernetes deployment exampel: 
 
+
+
+### Environment Variables
+
+- `UPKUBE_HOST` - Set host for http service, default is `127.0.0.1`
+- `UPKUBE_PORT` - Set port for http serivde, default is `8080`
+- `UPKUBE_ENV` - Set application environment, `PROD` or `DEV`, default is `DEV`.
+
+  - When using `PROD` environment (recommended for **production usage**), `upkube` connect with **In Cluster** configuration to kubernetes cluster, which uses the **service account** kubernetes gives to pods. 
+
+  - When using `DEV`, it connects from a master url or a kubeconfig filepath. default is `~/.kube/config`
+
+
+
 ## Local Development
 
 ## Stack
@@ -61,19 +75,14 @@ Download and make sure `minikube` is running.
 minikube start
 ```
 
-Start Application 
+Start live reloaded Application 
 
 ```bash
 go tool air
 ```
 
-### Environment Variables
+After update the template, generate go code using: 
 
-- `UPKUBE_HOST` - Set host for http service, default is `127.0.0.1`
-- `UPKUBE_PORT` - Set port for http serivde, default is `8080`
-- `UPKUBE_ENV` - Set application environment, `PROD` or `DEV`, default is `DEV`.
-
-  - When using `PROD` environment (recommended for **production usage**), `upkube` connect with **In Cluster** configuration to kubernetes cluster, which uses the **service account** kubernetes gives to pods. 
-
-  - When using `DEV`, it connects from a master url or a kubeconfig filepath. default is `~/.kube/config`
-
+```bash
+go tool templ generate
+```

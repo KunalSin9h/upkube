@@ -74,7 +74,7 @@ func Navigation(userEmail string) templ.Component {
 		var tokens = strings.Split(userEmail, "@")
 		var userName = tokens[0]
 		var orgEmail = tokens[1]
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto flex justify-between gap-4 items-center px-2 md:px-0 py-4\"><div class=\"p-2 my-2 shadow-sm bg-white flex items-center gap-4\"><a href=\"/\" class=\"font-semibold\">Deployments</a> <a href=\"/logs\" class=\"text-gray-400/80\">Activity Logs</a></div><div class=\"flex items-center gap-4\"><div class=\"p-2 my-2 shadow-sm bg-white flex items-center gap-4\"><p><span class=\"font-semibold\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto flex justify-between gap-4 items-center px-2 md:px-0 py-4\"><div class=\"p-2 my-2 shadow-sm bg-white flex items-center gap-4\"><a href=\"/\" class=\"font-semibold\">Deployments</a></div><div class=\"flex items-center gap-4\"><div class=\"p-2 my-2 shadow-sm bg-white flex items-center gap-4\"><p><span class=\"font-semibold\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
