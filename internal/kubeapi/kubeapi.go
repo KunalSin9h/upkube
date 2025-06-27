@@ -3,13 +3,46 @@ package kubeapi
 import (
 	"context"
 	"fmt"
+	"path/filepath"
+	"strings"
 
 	v1 "k8s.io/api/apps/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
 	"k8s.io/client-go/util/retry"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+func NewClientSet(env string) (*kubernetes.Clientset, error) {
+	var config *rest.Config
+	var err error
+
+	if strings.EqualFold(env, "PROD") {
+		// Create in-cluster config
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			return nil, fmt.Errorf("failed to create in-cluster config: %v", err)
+		}
+	} else {
+		// Use local kubeconfig
+		kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create config from kubeconfig file: %v", err)
+		}
+	}
+
+	// Create clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create clientset: %v", err)
+	}
+
+	return clientset, nil
+}
 
 func GetAllNameSpaces(clientset *kubernetes.Clientset) ([]string, error) {
 	namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})

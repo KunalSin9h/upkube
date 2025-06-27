@@ -1,85 +1,37 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/kunalsin9h/upkube/internal/kubeapi"
 	"github.com/kunalsin9h/upkube/views"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
-	HOST = "localhost"
-	PORT = "8080"
+	UPKUBE_HOST = "localhost"
+	UPKUBE_PORT = "8080"
+	UPKUBE_ENV  = "DEV" // or "PROD" based on your environment
 )
 
 func init() {
-	if os.Getenv("PORT") != "" {
-		PORT = os.Getenv("PORT")
+	if os.Getenv("UPKUBE_HOST") != "" {
+		UPKUBE_HOST = os.Getenv("UPKUBE_HOST")
 	}
-
-	if os.Getenv("HOST") != "" {
-		HOST = os.Getenv("HOST")
+	if os.Getenv("UPKUBE_PORT") != "" {
+		UPKUBE_PORT = os.Getenv("UPKUBE_PORT")
+	}
+	if os.Getenv("UPKUBE_ENV") != "" {
+		UPKUBE_ENV = os.Getenv("UPKUBE_ENV")
 	}
 }
 
 func main() {
-	// Create in-cluster config
-	// config, err := rest.InClusterConfig()
-	// if err != nil {
-	// 	log.Fatal(err.Error())
-	// }
-
-	// Use local kubeconfig
-	kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	clientSet, err := kubeapi.NewClientSet(UPKUBE_ENV)
 	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	// Create clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	// namespace := "default"
-	// deploymentName := "my-deployment"
-
-	// Restart Deployment
-	// restartDeployment(clientset, namespace, deploymentName)
-
-	// Update Deployment Image
-	// updateDeploymentImage(clientset, namespace, deploymentName, "nginx:1.21")
-
-	ctx := context.Background()
-
-	// List Deployments in a namespace (e.g., "default")
-	deployments, err := clientset.AppsV1().Deployments("default").List(ctx, metav1.ListOptions{})
-	if err != nil {
-		panic(err.Error())
-	}
-
-	for _, deploy := range deployments.Items {
-		fmt.Printf("Deployment Name: %s\n", deploy.Name)
-	}
-
-	namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		panic(err.Error())
-	}
-
-	for _, ns := range namespaces.Items {
-		fmt.Println(ns.Name)
+		log.Fatal(fmt.Errorf("failed to create Kubernetes clientset: %v", err))
 	}
 
 	http.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
@@ -101,7 +53,7 @@ func main() {
 			namespace = "default"
 		}
 
-		root := views.Root(userEmail, clientset, namespace)
+		root := views.Root(userEmail, clientSet, namespace)
 		root.Render(r.Context(), w)
 	})
 
@@ -119,7 +71,7 @@ func main() {
 		}
 		fmt.Println(namespace, deployment)
 		// TODO: Send some notification to the user.
-		err := kubeapi.RestartDeployment(clientset, namespace, deployment)
+		err := kubeapi.RestartDeployment(clientSet, namespace, deployment)
 		if err != nil {
 			http.Error(w, "Failed to restart deployment: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -146,7 +98,7 @@ func main() {
 
 		newImage := imagePrefix + ":" + tag
 
-		err := kubeapi.UpdateDeploymentImage(clientset, namespace, deployment, newImage)
+		err := kubeapi.UpdateDeploymentImage(clientSet, namespace, deployment, newImage)
 		if err != nil {
 			http.Error(w, "Failed to update image: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -154,6 +106,6 @@ func main() {
 		http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
 	})
 
-	fmt.Println("Listening on http://" + HOST + ":" + PORT)
-	http.ListenAndServe(HOST+":"+PORT, nil)
+	fmt.Println("Listening on http://" + UPKUBE_HOST + ":" + UPKUBE_PORT)
+	http.ListenAndServe(UPKUBE_HOST+":"+UPKUBE_PORT, nil)
 }
