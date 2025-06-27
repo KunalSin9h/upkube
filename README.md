@@ -38,9 +38,7 @@ spec:
           value: "8080"
 ```
 
-Fore full kubernetes deployment exampel: 
-
-
+Fore full kubernetes deployment exampel: [k8s](https://github.com/KunalSin9h/upkube/tree/master/k8s) directory. 
 
 ### Environment Variables
 
