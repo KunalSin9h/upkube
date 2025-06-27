@@ -4,11 +4,6 @@
 </div>
 
 
-## Stack
-
-- GO
-- [TEMPL](https://templ.guide/)
-- TAILWINDCSS
 
 ## Deployment
 
@@ -18,8 +13,21 @@ upkube
 
 ## Development
 
+## Stack
+
+- GO
+- [TEMPL](https://templ.guide/)
+- TAILWINDCSS
+- MINIKUBE
+
 ```bash
 go mod download
+```
+
+Download and make sure `minikube` is running. 
+
+```bash
+minikube start
 ```
 
 Start Application 
