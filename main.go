@@ -73,6 +73,15 @@ func main() {
 		fmt.Printf("Deployment Name: %s\n", deploy.Name)
 	}
 
+	namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+
+	for _, ns := range namespaces.Items {
+		fmt.Println(ns.Name)
+	}
+
 	http.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		// Pass the request or extracted info to your component
 		userEmail := r.Header.Get("Cf-Access-Authenticated-User-Email")
@@ -86,7 +95,12 @@ func main() {
 
 		userEmail = "kunal.singh@safedep.io"
 
-		root := views.Root(userEmail, clientset)
+		namespace := r.URL.Query().Get("namespace")
+		if namespace == "" {
+			namespace = "default"
+		}
+
+		root := views.Root(userEmail, clientset, namespace)
 		root.Render(r.Context(), w)
 	})
 

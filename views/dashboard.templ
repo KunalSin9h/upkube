@@ -9,9 +9,9 @@ import (
     "strconv"
 )
 
-templ Dashboard(userEmail string, clientset *kubernetes.Clientset) {
+templ Dashboard(userEmail string, clientset *kubernetes.Clientset, selectedNamespace string) {
     @Navigation(userEmail)
-    @Content(clientset)
+    @Content(clientset, selectedNamespace)
 }
 
 templ Navigation(userEmail string) {
@@ -30,18 +30,15 @@ templ Navigation(userEmail string) {
     </div>
 }
 
-templ Content(clientset *kubernetes.Clientset) {
-    // All deployments
-    {{ deployments, err := clientset.AppsV1().Deployments("").List(context.TODO(), metav1.ListOptions{}) }}
-
+templ Content(clientset *kubernetes.Clientset, selectedNamespace string) {
+    {{ deployments, err := clientset.AppsV1().Deployments(selectedNamespace).List(context.TODO(), metav1.ListOptions{}) }}
     if err != nil {
         @KubeError()
         return
     }
-
     <div class="min-h-screen">
         <div class="container mx-auto py-8">
-            @DeploymentsHeader(len(deployments.Items))
+            @DeploymentsHeader(clientset, len(deployments.Items), selectedNamespace)
             if len(deployments.Items) == 0 {
                 @NoDeployments()
             } else {
@@ -69,15 +66,31 @@ templ KubeError() {
     </div>
 }
 
-templ DeploymentsHeader(total int) {
+templ DeploymentsHeader(clientset *kubernetes.Clientset, total int, selectedNamespace string) {
+    {{ namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{}) }}
+
+    if err != nil {
+        @KubeError()
+        return
+    }
+
     <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-lg font-semibold text-gray-800">Deployments</h1>
+        <div class="flex items-center gap-4">
+            <h1 class="text-lg font-semibold text-gray-800">Deployments</h1>
+            <form method="get" class="bg-white shadow-sm">
+                <select name="namespace" class="px-2 py-1" onchange="this.form.submit()">
+                    for _, ns := range namespaces.Items {
+                        <option value={ns.Name} selected={selectedNamespace == ns.Name}>{ ns.Name }</option>
+                    }
+                </select>
+            </form>
+        </div>
         <span class="text-gray-800 text-sm p-2 bg-white shadow-sm">Total: <span class="font-bold">{ strconv.Itoa(total) }</span></span>
     </div>
 }
 
 templ NoDeployments() {
-    <div class="bg-white shadow-sm border p-12 text-center">
+    <div class="bg-white shadow-sm p-12 text-center">
         <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m0 0V9a2 2 0 012-2h2m0 0V6a2 2 0 012-2h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 01.293.707V9a2 2 0 01-2 2h-2m-6 0a2 2 0 002 2v1a2 2 0 01-2 2h-2a2 2 0 01-2-2v-1a2 2 0 012-2h2z"></path>
         </svg>

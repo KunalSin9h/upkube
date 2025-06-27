@@ -4,7 +4,7 @@ import (
     "k8s.io/client-go/kubernetes"
 )
 
-templ Root(userEmail string, clientset *kubernetes.Clientset) {
+templ Root(userEmail string, clientset *kubernetes.Clientset, namespace string) {
     <html lang="en">
         <head>
             <meta charset="UTF-8" />
@@ -36,7 +36,7 @@ templ Root(userEmail string, clientset *kubernetes.Clientset) {
             </style>
         </head>
         <body class="bg-gray-100 text-gray-900 poppins-regular">
-            @Dashboard(userEmail, clientset)
+            @Dashboard(userEmail, clientset, namespace)
         </body>
     </html>
 }
