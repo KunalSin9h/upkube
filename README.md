@@ -12,7 +12,7 @@
       serviceAccountName: upkube-sa
       containers:
       - name: upkube
-        image: ghcr.io/kunalsin9h/upkube:latest
+        image: ghcr.io/kunalsin9h/upkube:1.1.0
         ports:
         - containerPort: 8080
         env:
