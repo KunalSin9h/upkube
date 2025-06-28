@@ -1,7 +1,7 @@
 package api
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 	"net/http"
 
 	"k8s.io/client-go/kubernetes"
@@ -39,7 +39,7 @@ func StartHttpServer(config *ServerConfig) error {
 
 	err := http.ListenAndServe(config.Host+":"+config.Port, mux)
 	if err != nil {
-		return fmt.Errorf("failed to start server: %v", err)
+		return errors.Wrap(err, "failed to start server")
 	}
 
 	return nil

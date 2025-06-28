@@ -3,6 +3,8 @@ package kubeapi
 import (
 	"context"
 	"fmt"
+	"github.com/charmbracelet/log"
+	"github.com/pkg/errors"
 	"path/filepath"
 	"strings"
 
@@ -24,33 +26,30 @@ func NewClientSet(env string) (*kubernetes.Clientset, error) {
 		// Create in-cluster config
 		config, err = rest.InClusterConfig()
 		if err != nil {
-			fmt.Println("Failed to create in-cluster config:", err)
-			return nil, fmt.Errorf("failed to create in-cluster config: %v", err)
+			return nil, errors.Wrap(err, "failed to create in-cluster config")
 		}
 	} else {
 		// Use local kubeconfig
 		kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
 		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 		if err != nil {
-			fmt.Println("Failed to create config from kubeconfig file:", err)
-			return nil, fmt.Errorf("failed to create config from kubeconfig file: %v", err)
+			return nil, errors.Wrap(err, "failed to create config from kubeconfig file")
 		}
 	}
 
-	// Create clientset
-	clientset, err := kubernetes.NewForConfig(config)
+	// Create clientSet
+	clientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		fmt.Println("Failed to create clientset:", err)
-		return nil, fmt.Errorf("failed to create clientset: %v", err)
+		return nil, errors.Wrap(err, "failed to create clientSet")
 	}
 
-	return clientset, nil
+	return clientSet, nil
 }
 
-func GetAllNameSpaces(clientset *kubernetes.Clientset) ([]string, error) {
-	namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+func GetAllNameSpaces(clientSet *kubernetes.Clientset) ([]string, error) {
+	namespaces, err := clientSet.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		fmt.Printf("Failed to list namespaces: %v\n", err)
+		log.Warnf("Failed to list namespaces, permission not allowed. %v", err)
 		//return nil, fmt.Errorf("failed to list namespaces: %v", err)
 		// Hypothesis: is service account is in default namespaces, we might not access other namespaces
 		return []string{"default"}, nil // Return default namespace if listing fails
@@ -64,19 +63,18 @@ func GetAllNameSpaces(clientset *kubernetes.Clientset) ([]string, error) {
 	return namespaceNames, nil
 }
 
-func ListDeployments(clientset *kubernetes.Clientset, namespace string) (*v1.DeploymentList, error) {
-	deployments, err := clientset.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
+func ListDeployments(clientSet *kubernetes.Clientset, namespace string) (*v1.DeploymentList, error) {
+	deployments, err := clientSet.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		fmt.Println("Failed to list deployments in namespace", namespace, ":", err)
-		return nil, fmt.Errorf("failed to list deployments in namespace %s: %v", namespace, err)
+		return nil, errors.Wrapf(err, "failed to list deployments in namespace: %s", namespace)
 	}
 
 	return deployments, nil
 }
 
-func RestartDeployment(clientset *kubernetes.Clientset, namespace, deploymentName string) error {
+func RestartDeployment(clientSet *kubernetes.Clientset, namespace, deploymentName string) error {
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		deployment, getErr := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		deployment, getErr := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 		if getErr != nil {
 			return getErr
 		}
@@ -84,73 +82,79 @@ func RestartDeployment(clientset *kubernetes.Clientset, namespace, deploymentNam
 			deployment.Spec.Template.Annotations = map[string]string{}
 		}
 		deployment.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = fmt.Sprintf("%v", metav1.Now())
-		_, updateErr := clientset.AppsV1().Deployments(namespace).Update(context.TODO(), deployment, metav1.UpdateOptions{})
+		_, updateErr := clientSet.AppsV1().Deployments(namespace).Update(context.TODO(), deployment, metav1.UpdateOptions{})
 		return updateErr
 	})
 	if retryErr != nil {
-		fmt.Println("Failed to restart deployment in namespace", namespace, ":", retryErr)
-		return fmt.Errorf("Update failed: %v", retryErr)
+		return errors.Wrapf(retryErr, "Failed to restart deployment in namespace %s", namespace)
 	}
 
 	return nil
 }
 
-func UpdateDeploymentImage(clientset *kubernetes.Clientset, namespace, deploymentName, newImage string) error {
+func UpdateDeploymentImage(clientSet *kubernetes.Clientset, namespace, deploymentName, newImage string) error {
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		deployment, getErr := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+		deployment, getErr := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 		if getErr != nil {
 			return getErr
 		}
 		// Assuming the first container is the one to update
 		deployment.Spec.Template.Spec.Containers[0].Image = newImage
-		_, updateErr := clientset.AppsV1().Deployments(namespace).Update(context.TODO(), deployment, metav1.UpdateOptions{})
+		_, updateErr := clientSet.AppsV1().Deployments(namespace).Update(context.TODO(), deployment, metav1.UpdateOptions{})
 		return updateErr
 	})
 	if retryErr != nil {
-		fmt.Println("Failed to update deployment image in namespace", namespace, ":", retryErr)
-		return fmt.Errorf("Update failed: %v", retryErr)
+		return errors.Wrapf(retryErr, "Failed to update deployment image in namespace: %s", namespace)
 	}
 
 	return nil
 }
 
-// GetImagePullError returns the first image pull error reason and message for pods in a deployment, or empty string if none
-func GetDeploymentImageError(clientset *kubernetes.Clientset, namespace, deploymentName string) (string, string, error) {
+func GetDeploymentImageError(clientSet *kubernetes.Clientset, namespace, deploymentName string) (string, string, error) {
 	// List pods with the deployment's label selector
-	deployment, err := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+	deployment, err := clientSet.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	if err != nil {
-		fmt.Println("Failed to get deployment:", err)
-		return "", "", err
+		return "", "", errors.Wrap(err, "failed to get deployments")
 	}
+
 	selector := deployment.Spec.Selector.MatchLabels
-	labelSelector := []string{}
+
+	var labelSelector []string
 	for k, v := range selector {
 		labelSelector = append(labelSelector, fmt.Sprintf("%s=%s", k, v))
 	}
-	pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
+
+	pods, err := clientSet.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
 		LabelSelector: strings.Join(labelSelector, ","),
 	})
+
 	if err != nil {
-		fmt.Print("Failed to list pods for deployment:", err)
-		return "", "", err
+		log.Warn("failed to list pods, permission not granted")
+		return "", "", errors.Wrap(err, "failed to list pods for deployment")
 	}
+
 	for _, pod := range pods.Items {
 		for i, cs := range pod.Status.ContainerStatuses {
 			if cs.State.Waiting != nil {
 				reason := cs.State.Waiting.Reason
+
 				if reason == "ImagePullBackOff" || reason == "ErrImagePull" || reason == "CrashLoopBackOff" {
 					image := ""
+
 					if i < len(pod.Spec.Containers) {
 						image = pod.Spec.Containers[i].Image
 					}
+
 					msg := cs.State.Waiting.Message
 					if image != "" {
 						msg = fmt.Sprintf("Image: %s\n%s", image, msg)
 					}
+
 					return reason, msg, nil
 				}
 			}
 		}
 	}
+
 	return "", "", nil
 }
