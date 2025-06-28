@@ -49,8 +49,9 @@ rules:
   verbs: ["get", "list"]
 ```
 
-While `deployments` rule is essential, when you will also provide `pods`, **get** and **list** rules, `upkube` will shows any error while fetching any image and its error. 
+While `deployments` rule is essential, when you will also provide `pods` **list** rules, `upkube` will shows any error while fetching any image and its error. 
 
+![image](https://github.com/user-attachments/assets/43934686-2e32-4e48-9292-811dabcd113a)
 
 #### Roadmap
 
