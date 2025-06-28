@@ -10,17 +10,40 @@ import (
 type ServerConfig struct {
 	Host      string
 	Port      string
-	Env       string // DEV or PROD
+	Env       string
 	ClientSet *kubernetes.Clientset
 }
 
-func NewServiceConfig(host, port, env string, clientSet *kubernetes.Clientset) *ServerConfig {
-	return &ServerConfig{
-		Host:      host,
-		Port:      port,
-		Env:       env,
+type ServerConfigFunc func(cfg *ServerConfig)
+
+func WithHost(host string) ServerConfigFunc {
+	return func(config *ServerConfig) {
+		config.Host = host
+	}
+}
+
+func WithPort(port string) ServerConfigFunc {
+	return func(config *ServerConfig) {
+		config.Port = port
+	}
+}
+
+func WithEnv(env string) ServerConfigFunc {
+	return func(config *ServerConfig) {
+		config.Env = env
+	}
+}
+
+func NewServiceConfig(clientSet *kubernetes.Clientset, funcs ...ServerConfigFunc) *ServerConfig {
+	config := &ServerConfig{
 		ClientSet: clientSet,
 	}
+
+	for _, fn := range funcs {
+		fn(config)
+	}
+
+	return config
 }
 
 func StartHttpServer(config *ServerConfig) error {

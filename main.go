@@ -36,7 +36,8 @@ func main() {
 		log.Fatalf("Failed to create Kubernetes client: %v", err)
 	}
 
-	serverConfig := api.NewServiceConfig(UPKUBE_HOST, UPKUBE_PORT, UPKUBE_ENV, clientSet)
+	serverConfig := api.NewServiceConfig(clientSet,
+		api.WithHost(UPKUBE_HOST), api.WithPort(UPKUBE_PORT), api.WithEnv(UPKUBE_ENV))
 
 	log.Infof("Starting Upkube server on %s:%s in %s environment", serverConfig.Host, serverConfig.Port, serverConfig.Env)
 	if err := api.StartHttpServer(serverConfig); err != nil {
