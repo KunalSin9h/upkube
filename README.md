@@ -36,6 +36,21 @@ For full Kubernetes deployment example: [k8s](https://github.com/KunalSin9h/upku
 
   - When using `DEV`, it connects from a master url or a kubeconfig filepath. default is `~/.kube/config`
 
+### Service Account Roles Settings
+
+```yaml
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "patch", "update"]
+
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+```
+
+While `deployments` rule is essential, when you will also provide `pods`, **get** and **list** rules, `upkube` will shows any error while fetching any image and its error. 
+
 
 #### Roadmap
 
