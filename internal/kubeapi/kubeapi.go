@@ -133,11 +133,19 @@ func GetDeploymentImageError(clientset *kubernetes.Clientset, namespace, deploym
 		return "", "", err
 	}
 	for _, pod := range pods.Items {
-		for _, cs := range pod.Status.ContainerStatuses {
+		for i, cs := range pod.Status.ContainerStatuses {
 			if cs.State.Waiting != nil {
 				reason := cs.State.Waiting.Reason
 				if reason == "ImagePullBackOff" || reason == "ErrImagePull" || reason == "CrashLoopBackOff" {
-					return reason, cs.State.Waiting.Message, nil
+					image := ""
+					if i < len(pod.Spec.Containers) {
+						image = pod.Spec.Containers[i].Image
+					}
+					msg := cs.State.Waiting.Message
+					if image != "" {
+						msg = fmt.Sprintf("Image: %s\n%s", image, msg)
+					}
+					return reason, msg, nil
 				}
 			}
 		}
