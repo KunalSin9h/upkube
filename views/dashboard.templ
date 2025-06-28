@@ -50,7 +50,7 @@ templ Content(clientset *kubernetes.Clientset, selectedNamespace string) {
         deployments, err := kubeapi.ListDeployments(clientset, selectedNamespace) 
         
         if err != nil {
-            log.Error("Failed to list deployments: %v", err)
+            log.Errorf("Failed to list deployments: %v", err)
         }
     }}
 
