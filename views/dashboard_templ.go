@@ -772,7 +772,7 @@ func DeploymentCardActions(dep v1.Deployment, image string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "\"> <input type=\"text\" name=\"tag\" placeholder=\"New tag\" class=\"border border-gray-400 px-2 py-1 text-xs focus:outline-none focus:bg-gray-200 transition\" style=\"width:90px;\" required> <button type=\"submit\" class=\"px-3 py-1 bg-gray-100 border border-gray-400 text-xs font-semibold text-gray-800 hover:bg-gray-200 focus:bg-gray-200 transition-colors\">Update Tag</button></form><form method=\"post\" action=\"/restart\" class=\"cursor-pointer\"><input type=\"hidden\" name=\"namespace\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "\"> <input type=\"text\" name=\"tag\" placeholder=\"New tag\" class=\"border text-blue-400 border-blue-300 px-2 py-1 text-xs focus:outline-none focus:bg-blue-100 focus:text-gray-800 transition rounded-sm\" style=\"width:90px;\" required> <button type=\"submit\" class=\"px-3 py-1 border bg-blue-300/40 border-blue-300 text-xs font-semibold text-gray-800 hover:bg-blue-200 focus:bg-blue-200 transition-colors rounded-sm\">Update Tag</button></form><form method=\"post\" action=\"/restart\" class=\"cursor-pointer\"><input type=\"hidden\" name=\"namespace\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -798,7 +798,7 @@ func DeploymentCardActions(dep v1.Deployment, image string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "\"> <button type=\"submit\" class=\"px-3 py-1 bg-gray-100 border border-gray-400 text-xs font-semibold text-gray-800 hover:bg-gray-200 focus:bg-gray-200 transition-colors\">Restart</button></form></div></details>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "\"> <button type=\"submit\" class=\"px-3 py-1  border bg-blue-300/40 border-blue-300 text-xs font-semibold text-gray-800 hover:bg-blue-200 focus:bg-blue-200 transition-colors rounded-sm\">Restart</button></form></div></details>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
