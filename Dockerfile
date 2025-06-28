@@ -11,7 +11,10 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o upkube .
+ARG VERSION=dev
+ARG GOVERSION=go
+
+RUN go build -ldflags="-X 'main.version=${VERSION}' -X 'main.goVersion=${GOVERSION}'" -o upkube .
 
 # Final image
 FROM alpine:latest

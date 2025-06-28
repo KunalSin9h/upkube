@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
+	"github.com/charmbracelet/log"
 	"github.com/kunalsin9h/upkube/internal/api"
 	"github.com/kunalsin9h/upkube/internal/kubeapi"
 )
@@ -28,15 +28,18 @@ func init() {
 }
 
 func main() {
+	// Version and Go build version info
+	fmt.Println(upkubeInfoMessage())
+
 	clientSet, err := kubeapi.NewClientSet(UPKUBE_ENV)
 	if err != nil {
-		log.Fatal(fmt.Errorf("failed to create Kubernetes clientset: %v", err))
+		log.Fatalf("Failed to create Kubernetes client: %v", err)
 	}
 
-	config := api.NewServiceConfig(UPKUBE_HOST, UPKUBE_PORT, UPKUBE_ENV, clientSet)
+	serverConfig := api.NewServiceConfig(UPKUBE_HOST, UPKUBE_PORT, UPKUBE_ENV, clientSet)
 
-	log.Printf("Starting Upkube server on %s:%s in %s environment", config.Host, config.Port, config.Env)
-	if err := api.StartHttpServer(config); err != nil {
-		log.Fatal(fmt.Errorf("failed to start HTTP server: %v", err))
+	log.Infof("Starting Upkube server on %s:%s in %s environment", serverConfig.Host, serverConfig.Port, serverConfig.Env)
+	if err := api.StartHttpServer(serverConfig); err != nil {
+		log.Fatal("failed to start HTTP server: %v", err)
 	}
 }
