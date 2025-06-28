@@ -85,6 +85,9 @@ Start live reloaded Application
 
 ```bash
 go tool air
+ 
+# or and run
+make
 ```
 
 This will start the application on specieif port (using env), or deafult is `http://localhost:8080`
