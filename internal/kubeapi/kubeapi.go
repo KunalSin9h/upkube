@@ -113,3 +113,34 @@ func UpdateDeploymentImage(clientset *kubernetes.Clientset, namespace, deploymen
 
 	return nil
 }
+
+// GetImagePullError returns the first image pull error reason and message for pods in a deployment, or empty string if none
+func GetDeploymentImageError(clientset *kubernetes.Clientset, namespace, deploymentName string) (string, string, error) {
+	// List pods with the deployment's label selector
+	deployment, err := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+	if err != nil {
+		return "", "", err
+	}
+	selector := deployment.Spec.Selector.MatchLabels
+	labelSelector := []string{}
+	for k, v := range selector {
+		labelSelector = append(labelSelector, fmt.Sprintf("%s=%s", k, v))
+	}
+	pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
+		LabelSelector: strings.Join(labelSelector, ","),
+	})
+	if err != nil {
+		return "", "", err
+	}
+	for _, pod := range pods.Items {
+		for _, cs := range pod.Status.ContainerStatuses {
+			if cs.State.Waiting != nil {
+				reason := cs.State.Waiting.Reason
+				if reason == "ImagePullBackOff" || reason == "ErrImagePull" || reason == "CrashLoopBackOff" {
+					return reason, cs.State.Waiting.Message, nil
+				}
+			}
+		}
+	}
+	return "", "", nil
+}

@@ -58,7 +58,7 @@ templ Content(clientset *kubernetes.Clientset, selectedNamespace string) {
             } else {
                 <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     for _, dep := range deployments.Items {
-                        @DeploymentCard(dep)
+                        @DeploymentCard(dep, clientset)
                     }
                 </div>
             }
@@ -142,10 +142,18 @@ templ DeploymentCardHeader(dep v1.Deployment, statusText string, statusColor str
     </div>
 }
 
-templ DeploymentCardImage(image string) {
+templ DeploymentCardImage(image string, imageErrorReason string, imageErrorMsg string) {
     <div class="mb-4">
         <div class="text-xs text-gray-500 mb-1">Image</div>
         <div class="font-mono text-sm text-gray-800 break-all">{ image }</div>
+        if imageErrorReason != "" {
+            <div class="mt-2 p-2 bg-red-50 border border-red-200 text-xs text-red-700 rounded">
+                <strong>Image Error:</strong> { imageErrorReason }
+                if imageErrorMsg != "" {
+                    <div class="mt-1">{ imageErrorMsg }</div>
+                }
+            </div>
+        }
     </div>
 }
 
@@ -221,7 +229,7 @@ templ DeploymentCardActions(dep v1.Deployment, image string) {
     </details>
 }
 
-templ DeploymentCard(dep v1.Deployment) {
+templ DeploymentCard(dep v1.Deployment, clientset *kubernetes.Clientset) {
     {{
         readyReplicas := dep.Status.ReadyReplicas
         totalReplicas := int32(0)
@@ -247,11 +255,19 @@ templ DeploymentCard(dep v1.Deployment) {
         if len(dep.Spec.Template.Spec.Containers) > 0 {
             image = dep.Spec.Template.Spec.Containers[0].Image
         }
+        imageErrorReason := ""
+        imageErrorMsg := ""
+        if clientset != nil {
+            // Defensive: ignore error, just show if available
+            r, m, _ := kubeapi.GetDeploymentImageError(clientset, dep.Namespace, dep.Name)
+            imageErrorReason = r
+            imageErrorMsg = m
+        }
     }}
     <div class="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
         @DeploymentCardHeader(dep, statusText, statusColor, statusBg)
         <div class="p-6 flex-1 flex flex-col justify-between">
-            @DeploymentCardImage(image)
+            @DeploymentCardImage(image, imageErrorReason, imageErrorMsg)
             @DeploymentCardReplicas(readyReplicas, totalReplicas, isHealthy)
             @DeploymentCardActions(dep, image)
         </div>
