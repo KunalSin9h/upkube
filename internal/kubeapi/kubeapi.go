@@ -119,6 +119,7 @@ func GetDeploymentImageError(clientset *kubernetes.Clientset, namespace, deploym
 	// List pods with the deployment's label selector
 	deployment, err := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	if err != nil {
+		fmt.Println("Failed to get deployment:", err)
 		return "", "", err
 	}
 	selector := deployment.Spec.Selector.MatchLabels
@@ -130,6 +131,7 @@ func GetDeploymentImageError(clientset *kubernetes.Clientset, namespace, deploym
 		LabelSelector: strings.Join(labelSelector, ","),
 	})
 	if err != nil {
+		fmt.Print("Failed to list pods for deployment:", err)
 		return "", "", err
 	}
 	for _, pod := range pods.Items {

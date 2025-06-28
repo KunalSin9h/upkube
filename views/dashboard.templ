@@ -47,7 +47,6 @@ templ Content(clientset *kubernetes.Clientset, selectedNamespace string) {
 
     if err != nil {
         @KubeError()
-        return
     }
 
     <div class="min-h-screen">
@@ -75,7 +74,8 @@ templ KubeError() {
                 </svg>
                 <h2 class="text-xl font-semibold text-gray-800">Connection Error</h2>
             </div>
-            <p class="text-gray-600">Unable to connect to Kubernetes cluster. Please check your connection and try again.</p>
+            <p class="text-gray-600 mb-4">Unable to connect to Kubernetes cluster. Please check your connection and try again.</p>
+            <a href="/" class="inline-block mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">Go to Home</a>
         </div>
     </div>
 }
@@ -85,7 +85,6 @@ templ DeploymentsHeader(clientset *kubernetes.Clientset, total int, selectedName
 
     if err != nil {
         @KubeError()
-        return
     }
 
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
