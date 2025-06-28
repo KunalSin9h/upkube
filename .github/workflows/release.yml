@@ -19,18 +19,18 @@ jobs:
       - run: git fetch --force --tags
 
       - name: Set version outputs
-        id: vars
+        id: version
         run: echo "::set-output name=latest_tag::$(git describe --tags --abbrev=0)"
 
       - name: Check version outputs
-        run: echo ${{ steps.vars.outputs.latest_tag }}
+        run: echo ${{ steps.version.outputs.latest_tag }}
 
       - name: set goversion outpout
-        id: vars
+        id: goversion
         run: echo "::set-output name=go_version::$(go version | sed -r 's/go version go(.*)\ .*/\1/')"
 
       - name: Check goversion outputs
-        run: echo ${{ steps.vars.outputs.go_version }}
+        run: echo ${{ steps.goversion.outputs.go_version }}
 
       - uses: actions/setup-go@v4
         with:
@@ -38,10 +38,10 @@ jobs:
 
       - name: build docker image
         run: |
-          docker build --build-arg VERSION=${{ steps.vars.outputs.latest_tag }} --build-arg GOVERSION=${{ steps.vars.outputs.go_version }} \
-            -t ghcr.io/kunalsin9h/upkube:${{ steps.vars.outputs.latest_tag }} .
+          docker build --build-arg VERSION=${{ steps.version.outputs.latest_tag }} --build-arg GOVERSION=${{ steps.goversion.outputs.go_version }} \
+            -t ghcr.io/kunalsin9h/upkube:${{ steps.version.outputs.latest_tag }} .
 
       - name: push docker images
         run: |
           echo "${{ secrets.GHCR }}" | docker login ghcr.io -u "kunalsin9h" --password-stdin
-          docker push ghcr.io/kunalsin9h/upkube:${{ steps.vars.outputs.latest_tag }}
+          docker push ghcr.io/kunalsin9h/upkube:${{ steps.version.outputs.latest_tag }}
