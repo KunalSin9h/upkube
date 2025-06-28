@@ -7,6 +7,7 @@ import (
     "strconv"
 
     "github.com/kunalsin9h/upkube/internal/kubeapi"
+	"github.com/charmbracelet/log"
 )
 
 templ Dashboard(userEmail string, clientset *kubernetes.Clientset, selectedNamespace string) {
@@ -22,6 +23,8 @@ templ Navigation(userEmail string) {
     <div class="container mx-auto flex justify-between gap-4 items-center px-2 md:px-0 py-4">
         <div class="p-2 my-2 shadow-sm bg-white flex items-center gap-4">
             <a href="/" class="font-semibold">Deployments</a>
+
+            // TODO: Activity Logs & Request & Approve Workflow
             // <a href="/logs" class="text-gray-400/80">Activity Logs</a>
         </div>
         <div class="flex items-center gap-4">
@@ -43,26 +46,32 @@ templ Navigation(userEmail string) {
 }
 
 templ Content(clientset *kubernetes.Clientset, selectedNamespace string) {
-    {{ deployments, err := kubeapi.ListDeployments(clientset, selectedNamespace) }}
+    {{ 
+        deployments, err := kubeapi.ListDeployments(clientset, selectedNamespace) 
+        
+        if err != nil {
+            log.Errorf("Failed to list deployments: %v", err)
+        }
+    }}
 
     if err != nil {
         @KubeError()
-    }
-
-    <div class="min-h-screen">
-        <div class="container mx-auto py-8 px-2 md:px-0 ">
-            @DeploymentsHeader(clientset, len(deployments.Items), selectedNamespace)
-            if len(deployments.Items) == 0 {
-                @NoDeployments()
-            } else {
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    for _, dep := range deployments.Items {
-                        @DeploymentCard(dep, clientset)
-                    }
-                </div>
-            }
+    } else {
+        <div class="min-h-screen">
+            <div class="container mx-auto py-8 px-2 md:px-0 ">
+                @DeploymentsHeader(clientset, len(deployments.Items), selectedNamespace)
+                if len(deployments.Items) == 0 {
+                    @NoDeployments()
+                } else {
+                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        for _, dep := range deployments.Items {
+                            @DeploymentCard(dep, clientset)
+                        }
+                    </div>
+                }
+            </div>
         </div>
-    </div>
+    }
 }
 
 templ KubeError() {
@@ -81,36 +90,42 @@ templ KubeError() {
 }
 
 templ DeploymentsHeader(clientset *kubernetes.Clientset, total int, selectedNamespace string) {
-    {{ namespaces, err := kubeapi.GetAllNameSpaces(clientset) }}
+    {{ 
+        namespaces, err := kubeapi.GetAllNameSpaces(clientset) 
+        
+        if err != nil {
+            log.Errorf("Failed to load namespaces: %v", err)
+        }
+    }}
 
     if err != nil {
         @KubeError()
-    }
-
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-            <h1 class="text-lg font-semibold text-gray-800">Deployments</h1>
-            <form method="get" class="flex items-center">
-                <label for="namespace" class="text-sm text-gray-600 mr-2">Namespace:</label>
-                <select
-                    id="namespace"
-                    name="namespace"
-                    class="border border-gray-300 bg-white text-gray-800 text-sm px-2 py-1 focus:outline-none focus:border-indigo-500"
-                    style="box-shadow:none; border-radius:0; min-width:120px;"
-                    onchange="this.form.submit()"
-                >
-                    for _, ns := range namespaces {
-                        if selectedNamespace == ns {
-                            <option value={ns} selected>{ ns }</option>
-                        } else {
-                            <option value={ns}>{ ns }</option>
+    } else {
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <h1 class="text-lg font-semibold text-gray-800">Deployments</h1>
+                <form method="get" class="flex items-center">
+                    <label for="namespace" class="text-sm text-gray-600 mr-2">Namespace:</label>
+                    <select
+                        id="namespace"
+                        name="namespace"
+                        class="border border-gray-300 bg-white text-gray-800 text-sm px-2 py-1 focus:outline-none focus:border-indigo-500"
+                        style="box-shadow:none; border-radius:0; min-width:120px;"
+                        onchange="this.form.submit()"
+                    >
+                        for _, ns := range namespaces {
+                            if selectedNamespace == ns {
+                                <option value={ns} selected>{ ns }</option>
+                            } else {
+                                <option value={ns}>{ ns }</option>
+                            }
                         }
-                    }
-                </select>
-            </form>
+                    </select>
+                </form>
+            </div>
+            <span class="text-gray-800 text-sm p-2 bg-white shadow-sm w-full sm:w-auto text-center">Total: <span class="font-bold">{ strconv.Itoa(total) }</span></span>
         </div>
-        <span class="text-gray-800 text-sm p-2 bg-white shadow-sm w-full sm:w-auto text-center">Total: <span class="font-bold">{ strconv.Itoa(total) }</span></span>
-    </div>
+    }
 }
 
 templ NoDeployments() {
@@ -258,7 +273,12 @@ templ DeploymentCard(dep v1.Deployment, clientset *kubernetes.Clientset) {
         imageErrorMsg := ""
         if clientset != nil {
             // Defensive: ignore error, just show if available
-            r, m, _ := kubeapi.GetDeploymentImageError(clientset, dep.Namespace, dep.Name)
+            r, m, err := kubeapi.GetDeploymentImageError(clientset, dep.Namespace, dep.Name)
+
+            if err != nil {
+                log.Warnf("Failed to find image creation error: %v", err)
+            }
+
             imageErrorReason = r
             imageErrorMsg = m
         }

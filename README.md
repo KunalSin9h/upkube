@@ -12,7 +12,7 @@
       serviceAccountName: upkube-sa
       containers:
       - name: upkube
-        image: ghcr.io/kunalsin9h/upkube:latest
+        image: ghcr.io/kunalsin9h/upkube:1.1.0
         ports:
         - containerPort: 8080
         env:
@@ -85,6 +85,9 @@ Start live reloaded Application
 
 ```bash
 go tool air
+ 
+# or and run
+make
 ```
 
 This will start the application on specieif port (using env), or deafult is `http://localhost:8080`
