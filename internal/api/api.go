@@ -9,14 +9,14 @@ import (
 )
 
 func (c *ServerConfig) WebHome(w http.ResponseWriter, r *http.Request) {
-	// Pass the request or extracted info to your component
+	// Extract Cloudflare ZeroTrust custom header passed after auth
 	userEmail := r.Header.Get("Cf-Access-Authenticated-User-Email")
 
 	if userEmail == "" {
 		if strings.EqualFold(c.Env, "PROD") {
 			// In production, we expect the user to be authenticated
 			// Not authenticated or header missing
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			http.Error(w, "Unauthorized: Cloudflare ZeroTrust Authentication is required.", http.StatusUnauthorized)
 			return
 		}
 		userEmail = "dev.user@upkube"
