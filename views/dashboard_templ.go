@@ -143,7 +143,7 @@ func Content(clientset *kubernetes.Clientset, selectedNamespace string) templ.Co
 		deployments, err := kubeapi.ListDeployments(clientset, selectedNamespace)
 
 		if err != nil {
-			log.Error("Failed to list deployments: %v", err)
+			log.Errorf("Failed to list deployments: %v", err)
 		}
 		if err != nil {
 			templ_7745c5c3_Err = KubeError().Render(ctx, templ_7745c5c3_Buffer)
@@ -861,7 +861,6 @@ func DeploymentCard(dep v1.Deployment, clientset *kubernetes.Clientset) templ.Co
 			if err != nil {
 				log.Warnf("Failed to find image creation error: %v", err)
 			}
-			log.Warnf("Do we really came here")
 
 			imageErrorReason = r
 			imageErrorMsg = m
