@@ -81,6 +81,10 @@ Download and make sure `minikube` is running, for local k8s testing.
 minikube start
 ```
 
+```bash
+kubectl apply -f k8s/deployment.yml
+```
+
 Start live reloaded Application 
 
 ```bash
