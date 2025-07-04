@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> This project has been moved to [SafeDep](https://safedep.io) as internal tool. Appriopriate improvements will be merged here if needed. 
+> This project has been moved to [SafeDep/upkube](https://github/safedep/upkube), used internally internal tool.
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/8ee881d4-c8bf-471a-8c54-d32c6e8fc450" alt="Upcube logo" width="500px" />  
