@@ -3,7 +3,7 @@
   <h3>Bare minimum kubernetes deployment management platform, using Pod Service Account, built for usage behind Cloudflare Zero Trust</h3>
 </div>
 
-[![Made at SafeDep](https://github.com/user-attachments/assets/8ab0a2cd-7a34-49f4-8070-ededd3ea58c1)](https://safedep.io)
+[![Made at SafeDep](https://github.com/user-attachments/assets/50a0ebad-6dc8-461c-b86f-b8cc89a89045)](https://safedep.io)
 
 ### Production Deployment
 
