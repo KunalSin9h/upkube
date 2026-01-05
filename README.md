@@ -1,9 +1,11 @@
+<a href="https://safedep.io"><img src="https://github.com/user-attachments/assets/50a0ebad-6dc8-461c-b86f-b8cc89a89045" align="right" alt="Made at SafeDep badge" /></a>
+
+# Upkube
+
 <div align="center">
   <img src="https://github.com/user-attachments/assets/8ee881d4-c8bf-471a-8c54-d32c6e8fc450" alt="Upcube logo" width="500px" />  
   <h3>Bare minimum kubernetes deployment management platform, using Pod Service Account, built for usage behind Cloudflare Zero Trust</h3>
 </div>
-
-[![Made at SafeDep](https://github.com/user-attachments/assets/50a0ebad-6dc8-461c-b86f-b8cc89a89045)](https://safedep.io)
 
 ### Production Deployment
 
