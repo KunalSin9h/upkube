@@ -3,6 +3,8 @@
   <h3>Bare minimum kubernetes deployment management platform, using Pod Service Account, built for usage behind Cloudflare Zero Trust</h3>
 </div>
 
+[![Made at SafeDep](https://github.com/user-attachments/assets/8ab0a2cd-7a34-49f4-8070-ededd3ea58c1)](https://safedep.io)
+
 ### Production Deployment
 
 `upkube` is a `~60 MiB` container built using `golang` with `templ` html templating, no js. When deployed using `UPKUBE_ENV=PROD` variables (recommended for production usage), it connects to the Kubernetes cluster using **Pod Service Account**. It does not have auth, it's built for usage behind **Cloudflare Zero Trust**. 
